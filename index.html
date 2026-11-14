@@ -122,7 +122,7 @@ h1{font:800 clamp(22px,4.2vw,34px)/1.1 var(--display);letter-spacing:-.03em}
 .les.past{opacity:.62}
 .les.off{opacity:.5;border-left-style:dashed}
 .les.off .nm{text-decoration:line-through}
-.enter .les,.enter .tile,.enter .lrow{animation:rise .45s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i,0)*35ms)}
+.enter .les,.enter .tile,.enter .lrow,.enter .mc{animation:rise .45s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i,0)*35ms)}
 @keyframes rise{from{opacity:0;transform:translateY(10px)}}
 
 .tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
@@ -200,7 +200,35 @@ label input,label select,label textarea{font-size:16px;font-weight:400;color:var
 .back{align-self:flex-start;border:0;background:none;color:var(--muted);font-weight:600;padding:4px 0}
 .back:hover{color:var(--ink)}
 
+.wk{flex-wrap:wrap;align-items:center}
+.tabs.mini{padding:3px;border-radius:11px}
+.tabs.mini button{padding:6px 10px;font-size:14px}
+.month{display:flex;flex-direction:column;gap:6px}
+.mhead,.mgrid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.mhead span{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:0 4px}
+.mc{background:var(--surface);border:1px solid var(--line);border-radius:12px;min-height:112px;padding:6px;display:flex;flex-direction:column;gap:3px;min-width:0;cursor:pointer;transition:border-color .15s,box-shadow .15s,background .15s}
+.mc:hover{border-color:color-mix(in srgb,var(--ink) 40%,var(--line))}
+.mc.out{background:none;opacity:.5}
+.mc.sel{border-color:var(--ink);box-shadow:0 0 0 1px var(--ink)}
+.mc.over{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,var(--surface))}
+.mn{border:0;background:none;font:700 13px/1 var(--display);width:26px;height:26px;border-radius:50%;display:grid;place-items:center;flex:none;padding:0}
+.mc.tod .mn{background:var(--accent);color:var(--on-accent)}
+.mch{--c:var(--accent);border:0;border-left:3px solid var(--c);background:color-mix(in srgb,var(--c) 12%,var(--surface));border-radius:6px;font-size:12px;text-align:left;padding:3px 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%;transition:transform .15s}
+.mch:hover{transform:translateX(2px)}
+.mch b{font-variant-numeric:tabular-nums;font-weight:700}
+.mch.off{opacity:.5;text-decoration:line-through}
+.more{font-size:11px;font-weight:600;color:var(--muted);padding:0 6px}
+.dots{display:none}
+.alist{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px}
 @media (max-width:980px){
+  .mhead,.mgrid{gap:4px}
+  .mhead span{text-align:center;padding:0;font-size:11px}
+  .mc{min-height:56px;padding:4px 2px;align-items:center;gap:4px;border-radius:10px}
+  .mch,.more{display:none}
+  .dots{display:flex;gap:3px;flex-wrap:wrap;justify-content:center;max-width:40px}
+  .dots i{width:6px;height:6px;border-radius:50%;background:var(--c)}
+  .alist{grid-template-columns:1fr}
+
   #app{grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr) auto}
   #rail{flex-direction:row;align-items:center;padding:10px 16px;border-right:0;border-bottom:1px solid var(--line);gap:10px}
   .sync{margin:0 0 0 auto}
@@ -237,8 +265,8 @@ label input,label select,label textarea{font-size:16px;font-weight:400;color:var
     </div>
     <nav>
       <a href="#grafik" id="n-grafik"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>График</a>
-      <a href="#nastroiki" id="n-nastr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>Настройки</a>
       <a href="#detsa" id="n-detsa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg>Деца</a>
+      <a href="#nastroiki" id="n-nastr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>Настройки</a>
     </nav>
     <a href="#nastroiki" id="sync" class="sync s-local"><i></i><span>Само на това устройство</span></a>
   </aside>
@@ -389,7 +417,8 @@ function soft(){
   render(false);
 }
 
-var U={view:'grafik',week:monday(today()),day:today(),sid:null,tab:'uroci',mt:'rem'};
+var U={view:'grafik',week:monday(today()),month:today().slice(0,8)+'01',day:today(),sid:null,tab:'uroci',mt:'rem',mode:'week'};
+try{if(localStorage.getItem('kolba-mode')==='month')U.mode='month'}catch(e){}
 var E=null; // lesson being edited
 
 function stu(id){return S.students.filter(function(s){return s.id===id})[0]}
@@ -447,16 +476,45 @@ function lesCard(l,i){
     '<time>'+l.time+'</time><span class="nm">'+esc(st.name)+'</span><span class="sub">'+SUBJ[l.subj]+'</span>'+
     (l.topic?'<span class="tp">'+esc(l.topic)+'</span>':'')+(fl.length?'<span class="fl">'+fl.join(' · ')+'</span>':'')+'</button>';
 }
-function vGrafik(){
+function topBar(eyebrow,title,unit){
+  return '<header class="top"><div><p class="eyebrow">'+eyebrow+'</p><h1>'+title+'</h1></div><div class="wk">'+
+    '<div class="tabs mini" role="tablist" aria-label="Изглед"><button role="tab" class="'+(U.mode==='week'?'on':'')+'" data-act="mode" data-m="week">Седмица</button><button role="tab" class="'+(U.mode==='month'?'on':'')+'" data-act="mode" data-m="month">Месец</button></div>'+
+    '<button data-act="wk" data-n="-1" aria-label="Предишна '+unit+'">‹</button><button data-act="wk0">Днес</button><button data-act="wk" data-n="1" aria-label="Следваща '+unit+'">›</button></div></header>';
+}
+function headExtras(){
+  var h='',nx=nextLesson();
+  if(!G)h+='<div class="banner"><p>Данните се пазят само на това устройство. Свържи приложението с GitHub, за да се пазят постоянно и да са едни и същи на телефона и компютъра.</p><a class="btn pri" href="#nastroiki">Свържи</a></div>';
+  if(nx){var ns=stu(nx.sid);h+='<button class="next" style="--c:'+col(ns)+'" data-act="les" data-key="'+esc(nx.key)+'" data-d="'+nx.date+'"><span class="dot"></span><span><small>Следващ час</small><b>'+esc(ns.name)+'</b> · '+SUBJ[nx.subj]+' · '+whenTxt(nx)+(nx.topic?' · '+esc(nx.topic):'')+'</span></button>'}
+  return h;
+}
+function vGrafik(){return U.mode==='month'?vMonth():vWeek()}
+function vMonth(){
+  var t=today(),m0=U.month,mo=parse(m0).getMonth(),y=parse(m0).getFullYear();
+  var first=monday(m0),last=addD(iso(new Date(y,mo+1,0)),0),end=addD(monday(last),6);
+  if(U.day.slice(0,7)!==m0.slice(0,7))U.day=t.slice(0,7)===m0.slice(0,7)?t:m0;
+  var title=MON[mo].charAt(0).toUpperCase()+MON[mo].slice(1)+' '+y,tot=0,cells='',n=0;
+  for(var d=first;d<=end;d=addD(d,1)){
+    var ls=lessonsOn(d),act=ls.filter(function(l){return !l.off}),out=d.slice(0,7)!==m0.slice(0,7);
+    if(!out)tot+=act.length;
+    cells+='<div class="mc'+(out?' out':'')+(d===t?' tod':'')+(d===U.day?' sel':'')+'" style="--i:'+(n++)+'" data-act="mpick" data-d="'+d+'" data-drop="'+d+'">'+
+      '<button class="mn" data-act="mpick" data-d="'+d+'" aria-label="'+DOWL[dow(d)]+', '+fmtD(d)+', '+act.length+' часа">'+parse(d).getDate()+'</button>'+
+      ls.slice(0,4).map(function(l){var st=stu(l.sid);return '<button class="mch'+(l.off?' off':'')+'" style="--c:'+col(st)+'" draggable="true" data-act="les" data-key="'+esc(l.key)+'" data-d="'+l.date+'"><b>'+l.time+'</b> '+esc(st.name)+'</button>'}).join('')+
+      (ls.length>4?'<span class="more">още '+(ls.length-4)+'</span>':'')+
+      '<span class="dots">'+act.map(function(l){return '<i style="--c:'+col(stu(l.sid))+'"></i>'}).join('')+'</span></div>';
+  }
+  var ds=lessonsOn(U.day);
+  return '<div class="wrap">'+topBar('Месечен график · '+tot+' часа',title,'месец')+headExtras()+
+    '<div class="month"><div class="mhead">'+DOWS.map(function(x){return '<span>'+x+'</span>'}).join('')+'</div><div class="mgrid">'+cells+'</div></div>'+
+    '<div class="card agenda"><h3>'+DOWL[dow(U.day)]+', '+fmtD(U.day)+'<button class="btn sm" data-act="new" data-d="'+U.day+'">+ Час</button></h3>'+
+    (ds.length?'<div class="alist">'+ds.map(function(l,i){return lesCard(l,i)}).join('')+'</div>':'<p class="none">Няма часове в този ден.</p>')+'</div></div>';
+}
+function vWeek(){
   var days=[],i;for(i=0;i<7;i++)days.push(addD(U.week,i));
   var t=today(),a=parse(days[0]),b=parse(days[6]);
   var range=a.getMonth()===b.getMonth()?a.getDate()+' – '+fmtD(days[6]):fmtD(days[0])+' – '+fmtD(days[6]);
   if(days.indexOf(U.day)<0)U.day=days.indexOf(t)>=0?t:days[0];
-  var nx=nextLesson(),n=0;
-  var h='<div class="wrap"><header class="top"><div><p class="eyebrow">Седмичен график · '+b.getFullYear()+'</p><h1>'+range+'</h1></div>'+
-    '<div class="wk"><button data-act="wk" data-n="-1" aria-label="Предишна седмица">‹</button><button data-act="wk0">Днес</button><button data-act="wk" data-n="1" aria-label="Следваща седмица">›</button></div></header>';
-  if(!G)h+='<div class="banner"><p>Данните се пазят само на това устройство. Свържи приложението с GitHub, за да се пазят постоянно и да са едни и същи на телефона и компютъра.</p><a class="btn pri" href="#nastroiki">Свържи</a></div>';
-  if(nx){var ns=stu(nx.sid);h+='<button class="next" style="--c:'+col(ns)+'" data-act="les" data-key="'+esc(nx.key)+'" data-d="'+nx.date+'"><span class="dot"></span><span><small>Следващ час</small><b>'+esc(ns.name)+'</b> · '+SUBJ[nx.subj]+' · '+whenTxt(nx)+(nx.topic?' · '+esc(nx.topic):'')+'</span></button>'}
+  var n=0;
+  var h='<div class="wrap">'+topBar('Седмичен график · '+b.getFullYear(),range,'седмица')+headExtras();
   h+='<div class="strip">'+days.map(function(d,i){var c=lessonsOn(d).length;return '<button class="pill'+(d===U.day?' on':'')+(d===t?' tod':'')+'" data-act="day" data-d="'+d+'" aria-label="'+DOWL[i]+'"><span>'+DOWS[i]+'</span><b>'+parse(d).getDate()+'</b><i>'+(c?c+' ч.':'–')+'</i></button>'}).join('')+'</div>';
   h+='<div class="week">'+days.map(function(d,i){
     var ls=lessonsOn(d);
@@ -659,8 +717,16 @@ document.addEventListener('click',function(ev){
   if(ev.target.id==='ov'){closeSheet();return}
   var el=ev.target.closest('[data-act]');if(!el)return;
   var a=el.dataset.act,st=stu(U.sid),i=+el.dataset.i;
-  if(a==='wk'){U.week=addD(U.week,7*el.dataset.n);U.day=U.week;render(true)}
-  else if(a==='wk0'){U.week=monday(today());U.day=today();render(true)}
+  if(a==='wk'){
+    if(U.mode==='month'){var pm=parse(U.month);pm.setMonth(pm.getMonth()+(+el.dataset.n));U.month=iso(pm);U.day=U.month}
+    else{U.week=addD(U.week,7*el.dataset.n);U.day=U.week}
+    render(true)}
+  else if(a==='wk0'){U.week=monday(today());U.month=today().slice(0,8)+'01';U.day=today();render(true)}
+  else if(a==='mode'){
+    U.mode=el.dataset.m;try{localStorage.setItem('kolba-mode',U.mode)}catch(e){}
+    if(U.mode==='month')U.month=U.day.slice(0,8)+'01';else U.week=monday(U.day);
+    render(true)}
+  else if(a==='mpick'){U.day=el.dataset.d;if(U.day.slice(0,7)!==U.month.slice(0,7))U.month=U.day.slice(0,8)+'01';render(false);var ag=$('.agenda');if(ag&&window.innerWidth<=980)ag.scrollIntoView({behavior:'smooth',block:'nearest'})}
   else if(a==='day'){U.day=el.dataset.d;render(true)}
   else if(a==='les'){var L=findL(el.dataset.key,el.dataset.d);if(L)lessonSheet(L)}
   else if(a==='new')lessonSheet(null,el.dataset.d,el.dataset.sid);
@@ -747,7 +813,7 @@ document.addEventListener('submit',function(ev){
 });
 document.addEventListener('keydown',function(ev){if(ev.key==='Escape')closeSheet()});
 /* drag a lesson to another day (desktop) */
-document.addEventListener('dragstart',function(ev){var l=ev.target.closest&&ev.target.closest('.les');if(l)ev.dataTransfer.setData('text/plain',l.dataset.key+'~'+l.dataset.d)});
+document.addEventListener('dragstart',function(ev){var l=ev.target.closest&&ev.target.closest('.les,.mch');if(l)ev.dataTransfer.setData('text/plain',l.dataset.key+'~'+l.dataset.d)});
 document.addEventListener('dragover',function(ev){var c=ev.target.closest&&ev.target.closest('[data-drop]');if(c){ev.preventDefault();c.classList.add('over')}});
 document.addEventListener('dragleave',function(ev){var c=ev.target.closest&&ev.target.closest('[data-drop]');if(c&&!c.contains(ev.relatedTarget))c.classList.remove('over')});
 document.addEventListener('drop',function(ev){
