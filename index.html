@@ -69,6 +69,23 @@ nav a.on{background:var(--ink);color:var(--surface)}
 .sync.s-off i,.sync.s-auth i{background:var(--warn)}
 .sync.s-auth,.sync.s-off{color:var(--warn);border-color:color-mix(in srgb,var(--warn) 40%,var(--line))}
 @keyframes blink{to{opacity:.25}}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.stats>div{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.stats b{font:800 clamp(20px,3.4vw,28px)/1.1 var(--display);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.stats span{font-size:12px;color:var(--muted);line-height:1.3}
+.stats .money{background:var(--ink);border-color:var(--ink);color:var(--surface)}
+.stats .money span{color:inherit;opacity:.7}
+.brow{display:grid;grid-template-columns:12px minmax(0,1fr) 90px 90px;gap:10px;align-items:center;padding:8px 2px;border-top:1px solid var(--line);font-variant-numeric:tabular-nums}
+.brow i{width:10px;height:10px;border-radius:3px;background:var(--c)}
+.brow b{text-align:right;font-weight:600}
+.brow.bh{border-top:0;font-size:12px;color:var(--muted);font-weight:700}
+.brow.bh b{font-weight:700}
+.brow.bt{font-weight:700;border-top:2px solid var(--ink)}
+.brow.bt b{font-weight:800}
+.mch.vis b::before{content:"✓ ";color:var(--c)}
+.visits{display:flex;gap:6px 14px;flex-wrap:wrap;font-size:14px}
+.visits span:last-child{color:var(--muted)}
+@media (max-width:560px){.stats{grid-template-columns:1fr 1fr}.stats>div:last-child{grid-column:1/-1}.brow{grid-template-columns:12px minmax(0,1fr) 70px 70px}}
 .banner{display:flex;gap:12px;align-items:center;flex-wrap:wrap;border:1px dashed var(--accent);background:color-mix(in srgb,var(--accent) 7%,var(--surface));border-radius:var(--r);padding:12px 14px;font-size:14px}
 .banner p{flex:1;min-width:200px}
 .ok{color:#16a34a;font-weight:600}
@@ -328,7 +345,8 @@ var S=null;try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
 var SY={sha:null,busy:false,t:null,state:'local',dirty:false};
 try{SY.dirty=localStorage.getItem(KEY+'-dirty')==='1'}catch(e){}
 function valid(x){return !!(x&&x.students&&x.slots&&x.recs)}
-function norm(x){x.msgs=x.msgs||[];x.del=x.del||[];x.start=x.start||monday(today());return x}
+var FIRST_DAY='2026-11-01';
+function norm(x){x.msgs=x.msgs||[];x.del=x.del||[];x.start=x.start&&x.start<FIRST_DAY?x.start:FIRST_DAY;if(!(x.price>0))x.price=18;return x}
 if(!valid(S))S=seed();
 S=norm(S);
 function cache(){try{localStorage.setItem(KEY,JSON.stringify(S));localStorage.setItem(KEY+'-dirty',SY.dirty?'1':'')}catch(e){}}
@@ -366,7 +384,7 @@ function merge(a,b){
   return {students:u(a.students,b.students,id,'stu:'),slots:u(a.slots,b.slots,id,'slot:'),
     recs:u(a.recs,b.recs,function(r){return r.key},'rec:'),
     msgs:u(a.msgs,b.msgs,function(m){return m.sid+'|'+m.d+'|'+m.t},'msg:'),
-    start:a.start<b.start?a.start:b.start,del:Object.keys(del)};
+    start:a.start<b.start?a.start:b.start,price:a.price||b.price,del:Object.keys(del)};
 }
 function fail(e){SY.busy=false;setSync(e&&(e.status===401||e.status===403)?'auth':'off')}
 function push(){
@@ -467,8 +485,27 @@ function planInfo(st){
 function whenTxt(l){var t=today();return (l.date===t?'днес':l.date===addD(t,1)?'утре':DOWL[dow(l.date)].toLowerCase()+', '+fmtD(l.date))+' в '+l.time}
 
 /* ---------- views ---------- */
+function isVisit(l){return !l.off&&!!(l.topic&&l.topic.trim())&&isPast(l)}
+function eur(n){return n.toLocaleString('bg-BG',{maximumFractionDigits:2})+' €'}
+function monthEnd(m0){var d=parse(m0);return iso(new Date(d.getFullYear(),d.getMonth()+1,0))}
+function monthName(m0){return MON[parse(m0).getMonth()]}
+function monthStats(m0){
+  var r={n:0,left:0,by:{}},end=monthEnd(m0);
+  for(var d=m0;d<=end;d=addD(d,1))lessonsOn(d).forEach(function(l){
+    if(isVisit(l)){r.n++;r.by[l.sid]=(r.by[l.sid]||0)+1}
+    else if(!l.off&&!isPast(l))r.left++;
+  });
+  return r;
+}
+function statsBox(m0){
+  var m=monthStats(m0),p=S.price;
+  return '<div class="stats"><div><b>'+m.n+'</b><span>посещения през '+monthName(m0)+'</span></div>'+
+    '<div class="money"><b>'+eur(m.n*p)+'</b><span>сума за '+monthName(m0)+' ('+eur(p)+' на посещение)</span></div>'+
+    '<div><b>'+m.left+'</b><span>предстоящи часове до края на месеца</span></div></div>';
+}
 function lesCard(l,i){
   var st=stu(l.sid),fl=[];
+  if(isVisit(l))fl.push('✓ '+eur(S.price));
   if(l.off)fl.push('отменен');
   if(l.note)fl.push('бележка');
   if(l.hw)fl.push('домашна');
@@ -498,15 +535,18 @@ function vMonth(){
     if(!out)tot+=act.length;
     cells+='<div class="mc'+(out?' out':'')+(d===t?' tod':'')+(d===U.day?' sel':'')+'" style="--i:'+(n++)+'" data-act="mpick" data-d="'+d+'" data-drop="'+d+'">'+
       '<button class="mn" data-act="mpick" data-d="'+d+'" aria-label="'+DOWL[dow(d)]+', '+fmtD(d)+', '+act.length+' часа">'+parse(d).getDate()+'</button>'+
-      ls.slice(0,4).map(function(l){var st=stu(l.sid);return '<button class="mch'+(l.off?' off':'')+'" style="--c:'+col(st)+'" draggable="true" data-act="les" data-key="'+esc(l.key)+'" data-d="'+l.date+'"><b>'+l.time+'</b> '+esc(st.name)+'</button>'}).join('')+
+      ls.slice(0,4).map(function(l){var st=stu(l.sid);return '<button class="mch'+(l.off?' off':'')+(isVisit(l)?' vis':'')+'" style="--c:'+col(st)+'" draggable="true" data-act="les" data-key="'+esc(l.key)+'" data-d="'+l.date+'"><b>'+l.time+'</b> '+esc(st.name)+'</button>'}).join('')+
       (ls.length>4?'<span class="more">още '+(ls.length-4)+'</span>':'')+
       '<span class="dots">'+act.map(function(l){return '<i style="--c:'+col(stu(l.sid))+'"></i>'}).join('')+'</span></div>';
   }
   var ds=lessonsOn(U.day);
-  return '<div class="wrap">'+topBar('Месечен график · '+tot+' часа',title,'месец')+headExtras()+
+  var ms=monthStats(m0),byRows=S.students.filter(function(s2){return ms.by[s2.id]}).map(function(s2){return '<div class="brow" style="--c:'+col(s2)+'"><i></i><span>'+esc(s2.name)+'</span><b>'+ms.by[s2.id]+'</b><b>'+eur(ms.by[s2.id]*S.price)+'</b></div>'}).join('');
+  return '<div class="wrap">'+topBar('Месечен график · '+tot+' часа',title,'месец')+headExtras()+statsBox(m0)+
     '<div class="month"><div class="mhead">'+DOWS.map(function(x){return '<span>'+x+'</span>'}).join('')+'</div><div class="mgrid">'+cells+'</div></div>'+
     '<div class="card agenda"><h3>'+DOWL[dow(U.day)]+', '+fmtD(U.day)+'<button class="btn sm" data-act="new" data-d="'+U.day+'">+ Час</button></h3>'+
-    (ds.length?'<div class="alist">'+ds.map(function(l,i){return lesCard(l,i)}).join('')+'</div>':'<p class="none">Няма часове в този ден.</p>')+'</div></div>';
+    (ds.length?'<div class="alist">'+ds.map(function(l,i){return lesCard(l,i)}).join('')+'</div>':'<p class="none">Няма часове в този ден.</p>')+'</div>'+
+    '<div class="card"><h3>По деца · '+monthName(m0)+'</h3>'+(byRows?'<div class="brow bh"><i></i><span>Дете</span><b>Посещения</b><b>Сума</b></div>'+byRows+'<div class="brow bt"><i></i><span>Общо</span><b>'+ms.n+'</b><b>'+eur(ms.n*S.price)+'</b></div>':'<p class="none">Още няма отчетени посещения този месец.</p>')+
+    '<p class="hint">Посещение е минал час с попълнена тема, който не е отменен.</p></div></div>';
 }
 function vWeek(){
   var days=[],i;for(i=0;i<7;i++)days.push(addD(U.week,i));
@@ -514,7 +554,7 @@ function vWeek(){
   var range=a.getMonth()===b.getMonth()?a.getDate()+' – '+fmtD(days[6]):fmtD(days[0])+' – '+fmtD(days[6]);
   if(days.indexOf(U.day)<0)U.day=days.indexOf(t)>=0?t:days[0];
   var n=0;
-  var h='<div class="wrap">'+topBar('Седмичен график · '+b.getFullYear(),range,'седмица')+headExtras();
+  var h='<div class="wrap">'+topBar('Седмичен график · '+b.getFullYear(),range,'седмица')+headExtras()+statsBox(U.day.slice(0,8)+'01');
   h+='<div class="strip">'+days.map(function(d,i){var c=lessonsOn(d).length;return '<button class="pill'+(d===U.day?' on':'')+(d===t?' tod':'')+'" data-act="day" data-d="'+d+'" aria-label="'+DOWL[i]+'"><span>'+DOWS[i]+'</span><b>'+parse(d).getDate()+'</b><i>'+(c?c+' ч.':'–')+'</i></button>'}).join('')+'</div>';
   h+='<div class="week">'+days.map(function(d,i){
     var ls=lessonsOn(d);
@@ -555,9 +595,11 @@ function vDete(){
   var st=stu(U.sid);if(!st){U.view='detsa';return vDetsa()}
   var all=allLessons(st.id),up=all.filter(function(l){return !isPast(l)}),past=all.filter(isPast).reverse();
   var pi=planInfo(st),dn=pi.filter(function(x){return x.done}).length,nx=nextLesson(st.id);
+  var vAll=all.filter(isVisit).length,cm=today().slice(0,8)+'01',vM=all.filter(function(l){return isVisit(l)&&l.date>=cm}).length;
   var h='<div class="wrap" style="--c:'+col(st)+'"><button class="back" data-act="back">‹ Всички деца</button>'+
     '<div class="hero">'+tile(st,0,'div')+'<div class="meta"><h1>'+esc(st.name)+'</h1>'+
     '<p class="sub">'+(nx?'Следващ час: '+whenTxt(nx):'Няма предстоящ час')+' · цвят на пламъка: '+FLAMES[st.fl%FLAMES.length][0]+'</p>'+
+    '<p class="visits"><span><b>'+vM+'</b> посещения през '+monthName(cm)+' · <b>'+eur(vM*S.price)+'</b></span><span>общо '+vAll+' · '+eur(vAll*S.price)+'</span></p>'+
     (pi.length?'<div class="bar"><i style="width:'+Math.round(dn/pi.length*100)+'%"></i></div><p class="sub">'+dn+' от '+pi.length+' теми от програмата</p>':'')+'</div></div>'+
     '<div class="tabs" role="tablist">'+[['uroci','Уроци'],['plan','Програма'],['profil','Бележки'],['viber','Viber']].map(function(t){return '<button role="tab" class="'+(U.tab===t[0]?'on':'')+'" data-act="tab" data-t="'+t[0]+'">'+t[1]+'</button>'}).join('')+'</div>';
   if(U.tab==='uroci'){
@@ -604,6 +646,7 @@ function vNastr(){
       '<label>Ключ за достъп (token)<input type="password" id="g-token" autocomplete="off" placeholder="github_pat_…"></label>'+
       '<div class="acts"><button class="btn pri" type="submit">Свържи</button></div></form></details></div>';
   }
+  h+='<div class="card"><h3>Цена</h3><form id="fPrice" class="inl"><label style="flex:1">Цена на едно посещение (€)<input type="number" id="p-price" min="0" step="0.5" inputmode="decimal" value="'+S.price+'"></label><button class="btn pri" type="submit" style="align-self:flex-end">Запази</button></form><p class="hint">Цената се прилага за всички посещения, включително минали.</p></div>';
   h+='<div class="card"><h3>Резервно копие</h3><p class="hint">Копира всички данни като текст. Можеш да го запазиш в бележка или имейл и да го възстановиш по-късно.</p>'+
     '<div class="acts"><button class="btn" data-act="backup">Копирай всички данни</button></div>'+
     '<label>Възстановяване<textarea id="r-text" placeholder="Постави тук копираните данни"></textarea></label>'+
@@ -802,6 +845,7 @@ document.addEventListener('submit',function(ev){
     if(!c||!c.t){toast('Кодът не е разпознат');return}
     connect({owner:c.o,repo:c.r,token:c.t});
   }
+  else if(id==='fPrice'){var pv=parseFloat(String($('#p-price').value).replace(',','.'));if(!(pv>0)){toast('Въведи цена над 0');return}S.price=pv;save();toast('Цената е запазена')}
   else if(id==='fConn')connect({owner:$('#g-owner').value.trim(),repo:$('#g-repo').value.trim(),token:$('#g-token').value.trim()});
   else if(id==='fPlan'){var v=$('#p-new').value.trim();if(v&&st){st.plan.push({t:v,done:false});save();render(false);$('#p-new').focus()}}
   else if(id==='fStu'){
