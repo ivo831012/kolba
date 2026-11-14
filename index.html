@@ -535,8 +535,8 @@ function vNastr(){
     h+='<div class="card"><h3>Връзка с GitHub</h3>'+
       '<p>Свързано с <b>'+esc(G.owner)+'/'+esc(G.repo)+'</b>. Състояние: <span class="'+(SY.state==='ok'?'ok':'')+'">'+SYNC_TXT[SY.state]+'</span></p>'+
       '<p class="hint">Всяка промяна се записва във файла data.json в това частно хранилище, заедно с история на промените. Ако няма интернет, промените се пазят на устройството и се качват, щом връзката се върне.</p>'+
-      '<div class="acts"><button class="btn pri" data-act="code">Копирай кода за свързване</button><button class="btn" data-act="sync">Обнови сега</button><button class="btn danger" data-act="unlink">Разкачи това устройство</button></div>'+
-      '<p class="hint">Кодът за свързване съдържа ключа за достъп. С него друго устройство (телефон, компютър) се свързва с едно поставяне. Пращай го само на човека, който ползва приложението.</p></div>';
+      '<div class="acts"><button class="btn pri" data-act="link">Копирай линк за свързване</button><button class="btn" data-act="sync">Обнови сега</button><button class="btn danger" data-act="unlink">Разкачи това устройство</button></div>'+
+      '<p class="hint">Изпрати линка на устройството, което искаш да свържеш (например във Viber). Отваря се веднъж и устройството остава свързано. Линкът съдържа ключа за достъп, затова го пращай само на човека, който ползва приложението.</p></div>';
   }else{
     h+='<div class="card"><h3>Свържи с GitHub</h3>'+
       '<p class="hint">Сега данните се пазят само на това устройство. След свързване се пазят в частно хранилище в GitHub и са еднакви навсякъде, където е свързано приложението.</p>'+
@@ -639,7 +639,16 @@ function symFor(name){
 
 /* ---------- events ---------- */
 function go(h){if(location.hash==='#'+h)route();else location.hash=h}
+function fromLink(){
+  var h=location.hash||'';
+  if(h.indexOf('#vrazka=')!==0)return false;
+  var c=null;try{c=JSON.parse(b64d(decodeURIComponent(h.slice(8))))}catch(e){}
+  try{history.replaceState(null,'',location.pathname+location.search)}catch(e){location.hash=''}
+  if(c&&c.t)connect({owner:c.o,repo:c.r,token:c.t});else toast('Линкът за свързване е непълен');
+  return true;
+}
 function route(){
+  if(fromLink()){U.view='grafik';render(true);return}
   var h=(location.hash||'').slice(1);
   if(h.indexOf('dete-')===0&&stu(h.slice(5))){U.view='dete';if(U.sid!==h.slice(5)){U.sid=h.slice(5);U.tab='uroci'}}
   else if(h==='detsa')U.view='detsa';else if(h==='nastroiki')U.view='nastr';else U.view='grafik';
@@ -677,7 +686,7 @@ document.addEventListener('click',function(ev){
     if(el.dataset.armed){tomb('stu:'+st.id);S.slots.forEach(function(x){if(x.sid===st.id)tomb('slot:'+x.id)});S.recs.forEach(function(r){if(r.sid===st.id)tomb('rec:'+r.key)});S.students=S.students.filter(function(s){return s.id!==st.id});S.slots=S.slots.filter(function(s){return s.sid!==st.id});S.recs=S.recs.filter(function(r){return r.sid!==st.id});save();go('detsa');toast('Изтрито')}
     else{el.dataset.armed='1';el.textContent='Натисни още веднъж, за да изтриеш'}
   }
-  if(a==='code')copyText(b64e(JSON.stringify({o:G.owner,r:G.repo,t:G.token})),'Кодът е копиран');
+  if(a==='link')copyText(location.origin+location.pathname+'#vrazka='+encodeURIComponent(b64e(JSON.stringify({o:G.owner,r:G.repo,t:G.token}))),'Линкът е копиран');
   else if(a==='sync'){refresh();toast('Проверявам за промени')}
   else if(a==='unlink'){
     if(el.dataset.armed){try{localStorage.removeItem(CFG_KEY)}catch(e){}G=null;SY.sha=null;setSync('local');render(false);toast('Устройството е разкачено')}
@@ -748,8 +757,9 @@ document.addEventListener('drop',function(ev){
   render(false);
 });
 setSync(G?'load':'local');
+var linked=(location.hash||'').indexOf('#vrazka=')===0;
 route();
-boot();
+if(!linked)boot();
 document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')refresh()});
 window.addEventListener('online',refresh);
 setInterval(function(){if(document.visibilityState==='visible')refresh()},60000);
